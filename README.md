@@ -1,5 +1,14 @@
+[ ![Download](https://api.bintray.com/packages/ovotech/maven/ciris-credstash/images/download.svg) ](https://bintray.com/ovotech/maven/ciris-credstash/_latestVersion)
 # ciris-credstash
-Ciris Integration for loading secrets from [Credstash](https://github.com/fugue/credstash)
+Ciris Integration for loading secrets from [Credstash](https://github.com/fugue/credstash). 
+
+#Setup
+To use ciris-credstash, add the following artifact to your dependencies: 
+
+```
+libraryDependencies += "com.ovoenergy" %% "ciris-credstash" %% VERSION
+
+```
 
 Dependencies
 ------------
