@@ -5,12 +5,11 @@ jobs:
     machine: true
     steps:
        - checkout
-       - run: sbt compile
        - deploy:
            name: Deploy if master branch
            command: |
              if [ "${CIRCLE_BRANCH}" == "master" -a "${CIRCLE_PROJECT_USERNAME}" == "ovotech" ]; then
-               sbt "release with-defaults"
+               echo /dev/null | sbt "release with-defaults"
              fi
 experimental:
   notify:
