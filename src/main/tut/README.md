@@ -9,7 +9,7 @@ This integration requires Credstash to be installed on the host machine, details
 
 Example
 -------
-```scala
+```tut:silent
 import ciris._
 import ciris.credstash._
 
