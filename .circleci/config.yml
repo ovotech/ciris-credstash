@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/ciris-credstash
+    machine: true
+    steps:
+       - checkout
+       - run: sbt compile
+       - deploy:
+           name: Deploy if master branch
+           command: |
+             if [ "${CIRCLE_BRANCH}" == "master" -a "${CIRCLE_PROJECT_USERNAME}" == "ovotech" ]; then
+               sbt "release with-defaults"
+             fi
+experimental:
+  notify:
+    branches:
+      only:
+        - master
