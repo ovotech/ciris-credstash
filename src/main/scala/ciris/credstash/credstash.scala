@@ -35,4 +35,13 @@ package object credstash {
       .read(key)
       .decodeValue[Value]
   }
+
+  def credstashF[F[_]: Sync, Value](region: String)(key: String)(
+      implicit decoder: ConfigDecoder[String, Value]
+  ): ConfigEntry[F, String, String, Value] = {
+    credstashSource(region)
+      .suspendF[F]
+      .read(key)
+      .decodeValue[Value]
+  }
 }
