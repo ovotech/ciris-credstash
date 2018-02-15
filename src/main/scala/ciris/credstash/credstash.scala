@@ -22,10 +22,8 @@ package object credstash {
       val result =
         outputBuffer.mkString("\n").trim
 
-      exitValue match {
-        case 0 => Right(result)
-        case _ => Left(ConfigError(result))
-      }
+      if (exitValue == 0) Right(result)
+      else Left(ConfigError(result))
     }
 
   def credstash[Value](region: String)(key: String)(
