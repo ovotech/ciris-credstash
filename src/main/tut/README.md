@@ -2,7 +2,8 @@
 # ciris-credstash
 Ciris Integration for loading secrets from [Credstash](https://github.com/fugue/credstash). 
 
-#Setup
+Setup
+-----
 To use ciris-credstash, add the following artifact to your dependencies: 
 
 ```
