@@ -9,7 +9,7 @@ releaseCrossBuild := true
 scalacOptions += "-language:higherKinds"
 
 libraryDependencies ++= Seq(
-  "is.cir" %% "ciris-core" % "0.7.2"
+  "is.cir" %% "ciris-core" % "0.8.1"
 )
 
 // Tut
