@@ -1,35 +1,42 @@
 package ciris
 
-import ciris.api._
+import java.util
 
-import scala.collection.mutable.ListBuffer
-import scala.sys.process._
+import ciris.api._
+import com.amazonaws.auth.{AWSCredentialsProvider, DefaultAWSCredentialsProviderChain}
+import com.amazonaws.regions.{AwsRegionProvider, DefaultAwsRegionProviderChain}
+import com.jessecoyle.{CredStashBouncyCastleCrypto, CredStashJavaxCrypto, JCredStash}
+
+import scala.util.Try
+
 
 package object credstash {
+
+  private[credstash] class ConstantAwsRegionProvider(region: String) extends AwsRegionProvider {
+    override def getRegion: String = region
+  }
+
+  private val emptyContext = new util.HashMap[String, String]()
+
   val CredstashKeyType: ConfigKeyType[String] =
     ConfigKeyType("credstash key")
 
-  def credstashSource(region: String): ConfigSource[Id, String, String] =
+  def credstashSource(awsCredentialProvider: AWSCredentialsProvider = new DefaultAWSCredentialsProviderChain,
+                      awsRegionProvider: AwsRegionProvider = new DefaultAwsRegionProviderChain): ConfigSource[Id, String, String] =
     ConfigSource(CredstashKeyType) { key =>
-      val outputBuffer =
-        ListBuffer.empty[String]
 
-      val exitValue =
-        s"credstash get -r $region $key"
-          .run(ProcessLogger(outputBuffer append _))
-          .exitValue()
+      val credstashClient = new JCredStash("credential-store", awsCredentialProvider, awsRegionProvider, new CredStashBouncyCastleCrypto())
 
-      val result =
-        outputBuffer.mkString("\n").trim
-
-      if (exitValue == 0) Right(result)
-      else Left(ConfigError(result))
+      Try(credstashClient.getSecret(key, emptyContext)).fold(
+        e => Left(ConfigError(e.getMessage)),
+        Right.apply
+      )
     }
 
   def credstash[Value](region: String)(key: String)(
       implicit decoder: ConfigDecoder[String, Value]
   ): ConfigEntry[Id, String, String, Value] = {
-    credstashSource(region)
+    credstashSource(awsRegionProvider = new ConstantAwsRegionProvider(region))
       .read(key)
       .decodeValue[Value]
   }
@@ -37,9 +44,29 @@ package object credstash {
   def credstashF[F[_]: Sync, Value](region: String)(key: String)(
       implicit decoder: ConfigDecoder[String, Value]
   ): ConfigEntry[F, String, String, Value] = {
-    credstashSource(region)
+    credstashSource(awsRegionProvider = new ConstantAwsRegionProvider(region))
       .suspendF[F]
       .read(key)
       .decodeValue[Value]
   }
+
+  def credstash[Value](awsCredentialProvider: AWSCredentialsProvider = new DefaultAWSCredentialsProviderChain,
+                       awsRegionProvider: AwsRegionProvider = new DefaultAwsRegionProviderChain)(key: String)(
+    implicit decoder: ConfigDecoder[String, Value]
+  ): ConfigEntry[Id, String, String, Value] = {
+    credstashSource(awsCredentialProvider, awsRegionProvider)
+      .read(key)
+      .decodeValue[Value]
+  }
+
+  def credstashF[F[_]: Sync, Value](awsCredentialProvider: AWSCredentialsProvider = new DefaultAWSCredentialsProviderChain,
+                                    awsRegionProvider: AwsRegionProvider = new DefaultAwsRegionProviderChain)(key: String)(
+    implicit decoder: ConfigDecoder[String, Value]
+  ): ConfigEntry[F, String, String, Value] = {
+    credstashSource(awsCredentialProvider, awsRegionProvider)
+      .suspendF[F]
+      .read(key)
+      .decodeValue[Value]
+  }
+
 }
