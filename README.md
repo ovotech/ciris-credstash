@@ -14,7 +14,7 @@ libraryDependencies += "com.ovoenergy" %% "ciris-credstash" %% VERSION
 Dependencies
 ------------
 
-This integration requires Credstash to be installed on the host machine, details of how to do this can be found in the Credstash [Readme](https://github.com/fugue/credstash). 
+This integration depends on aws-java-sdk-core and JCredstash.
 
 
 Example
@@ -27,9 +27,29 @@ case class TestConfig(credstashSecret: String)
 
 object Example {
   val res = loadConfig(
-    credstash[String]("eu-west-1")("uat.twilio.auth_token")
+    credstash[String]()("uat.twilio.auth_token")
   ) { (secret: String) =>
     TestConfig(secret)
   }
 }
+```
+
+The AWS credentials and region can be configured by passing an AwsCredentialsProvider and/or an AwsRegionProvider.
+```scala
+import ciris._
+import ciris.credstash._
+import com.amazonaws.regions.DefaultAwsRegionProviderChain
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
+
+case class TestConfig(credstashSecret: String)
+
+object Example {
+  val res = loadConfig(
+    credstash[String](awsCredentialProvider = new DefaultAWSCredentialsProviderChain,
+                      awsRegionProvider = new DefaultAwsRegionProviderChain)("uat.twilio.auth_token")
+  ) { (secret: String) =>
+    TestConfig(secret)
+  }
+}
+
 ```
