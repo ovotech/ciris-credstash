@@ -5,9 +5,9 @@ import java.util
 import ciris.api._
 import com.amazonaws.auth.{AWSCredentialsProvider, DefaultAWSCredentialsProviderChain}
 import com.amazonaws.regions.{AwsRegionProvider, DefaultAwsRegionProviderChain}
-import com.jessecoyle.{CredStashBouncyCastleCrypto, CredStashJavaxCrypto, JCredStash}
+import com.jessecoyle.{CredStashBouncyCastleCrypto, JCredStash}
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 
 package object credstash {
@@ -27,10 +27,10 @@ package object credstash {
 
       val credstashClient = new JCredStash("credential-store", awsCredentialProvider, awsRegionProvider, new CredStashBouncyCastleCrypto())
 
-      Try(credstashClient.getSecret(key, emptyContext)).fold(
-        e => Left(ConfigError(e.getMessage)),
-        Right.apply
-      )
+      Try(credstashClient.getSecret(key, emptyContext)) match {
+        case Success(value) => Right(value)
+        case Failure(e) => Left(ConfigError(e.getMessage))
+      }
     }
 
   def credstash[Value](region: String)(key: String)(
