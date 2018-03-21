@@ -9,7 +9,7 @@ releaseCrossBuild := true
 scalacOptions += "-language:higherKinds"
 
 libraryDependencies ++= Seq(
-  "is.cir" %% "ciris-core" % "0.8.1",
+  "is.cir" %% "ciris-core" % "0.9.0",
   "com.amazonaws" % "aws-java-sdk-core" % "1.11.293",
   "co.wrisk.jcredstash" % "jcredstash" % "0.0.4"
 )
